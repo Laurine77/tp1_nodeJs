@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body>
+    <h1 style="text-align: center;">Liste des utilisateurs</h1>
+
+    <button type="button" class="btn btn-warning">Ajouter</button>
+
+    <table class="table table-warning table-striped">
+        <thead>
+            <tr class="table-warning">
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="userTableBody">
+
+        </tbody>
+    </table>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script>
+    // Fonction pour récupérer les données utilisateur depuis votre API
+    async function fetchUserData() {
+        try {
+            const response = await fetch('http://localhost:8000/utilisateur');
+            const userData = await response.json();
+            populateTable(userData);
+        } catch (error) {
+            console.error('Erreur lors de la récupération des données utilisateur:', error);
+        }
+    }
+    fetchUserData()
+
+    // Fonction pour générer les lignes du tableau avec les données utilisateur
+    function populateTable(users) {
+        const userTableBody = document.getElementById('userTableBody');
+        userTableBody.innerHTML = '';
+
+        users.forEach(user => {
+            const row = document.createElement('tr');
+
+            // Ajouter les cellules avec les données de l'utilisateur
+            const cells = ['nom', 'prenom', 'email'];
+
+            cells.forEach(property => {
+                const cell = document.createElement('td');
+                cell.textContent = user[property];
+                row.appendChild(cell);
+            });
+
+            // Ajouter les boutons Modifier et Supprimer
+            const actionsCell = document.createElement('td');
+
+            const editButton = document.createElement('button');
+            editButton.textContent = 'Modifier';
+            editButton.addEventListener('click', () => editUser(user.id));
+            actionsCell.appendChild(editButton);
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Supprimer';
+            deleteButton.addEventListener('click', () => deleteUser(user.id));
+            actionsCell.appendChild(deleteButton);
+
+            row.appendChild(actionsCell);
+
+            // Ajouter la ligne au tableau
+            userTableBody.appendChild(row);
+        });
+    }
+
+    // Fonction pour modifier un utilisateur
+function editUser(userId) {
+
+    // Récupérer les informations de l'utilisateur actuel (à adapter selon votre système)
+    fetch(`http://localhost:8000/utilisateur/${userId}`)
+        .then(response => response.json())
+        .then(user => {
+            // Afficher le formulaire de modification avec les données actuelles de l'utilisateur
+            const editForm = document.createElement('form');
+            editForm.innerHTML = `
+                <label for="nom">Nom:</label>
+                <input type="text" id="nom" name="nom" value="${user.nom}"><br>
+
+                <label for="prenom">Prénom:</label>
+                <input type="text" id="prenom" name="prenom" value="${user.prenom}"><br>
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" value="${user.email}"><br>
+
+                <button type="button" onclick="submitEditForm(${userId})">Enregistrer</button>
+            `;
+
+            // Remplacer le contenu actuel de la page par le formulaire
+            const contentContainer = document.getElementById('contentContainer');
+            contentContainer.innerHTML = '';
+            contentContainer.appendChild(editForm);
+        })
+        .catch(error => {
+            console.error('Erreur lors de la récupération des informations de l\'utilisateur:', error);
+        });
+}
+
+        // Fonction pour soumettre le formulaire de modification
+        function submitEditForm(userId) {
+            const nom = document.getElementById('nom').value;
+            const prenom = document.getElementById('prenom').value;
+            const email = document.getElementById('email').value;
+
+            // Envoi des données modifiées au serveur avec la méthode PUT
+            fetch(`http://localhost:8000/utilisateur/modification/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    nom: nom,
+                    prenom: prenom,
+                    email: email,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Réponse du serveur après modification :', data);
+                // Rafraîchir la page ou effectuer d'autres actions si nécessaire
+                fetchUserData();
+            })
+            .catch(error => {
+                console.error('Erreur lors de la modification de l\'utilisateur:', error);
+            });
+        }
+
+        
+
+    </script>
+</body>
+</html>

@@ -28,10 +28,10 @@
     <script>
     // Fonction pour récupérer les données utilisateur depuis votre API
     async function fetchUserData() {
-        try {
-            const response = await fetch('http://localhost:8000/utilisateur');
-            const userData = await response.json();
-            populateTable(userData);
+    try {
+        const response = await fetch('http://localhost:8000/user/all');
+        const userData = await response.json();
+        populateTable(userData);
         } catch (error) {
             console.error('Erreur lors de la récupération des données utilisateur:', error);
         }
@@ -74,12 +74,12 @@
             userTableBody.appendChild(row);
         });
     }
-
+    populateTable();
     // Fonction pour modifier un utilisateur
 function editUser(userId) {
 
-    // Récupérer les informations de l'utilisateur actuel (à adapter selon votre système)
-    fetch(`http://localhost:8000/utilisateur/${userId}`)
+    // Récupérer les informations de l'utilisateur actuel 
+    fetch(`http://localhost:8000/user/${userId}`)
         .then(response => response.json())
         .then(user => {
             // Afficher le formulaire de modification avec les données actuelles de l'utilisateur
@@ -105,39 +105,37 @@ function editUser(userId) {
         .catch(error => {
             console.error('Erreur lors de la récupération des informations de l\'utilisateur:', error);
         });
-}
+    }
 
-        // Fonction pour soumettre le formulaire de modification
-        function submitEditForm(userId) {
-            const nom = document.getElementById('nom').value;
-            const prenom = document.getElementById('prenom').value;
-            const email = document.getElementById('email').value;
+    // Fonction pour soumettre le formulaire de modification
+    function submitEditForm(userId) {
+        const nom = document.getElementById('nom').value;
+        const prenom = document.getElementById('prenom').value;
+        const email = document.getElementById('email').value;
 
-            // Envoi des données modifiées au serveur avec la méthode PUT
-            fetch(`http://localhost:8000/utilisateur/modification/${userId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    nom: nom,
-                    prenom: prenom,
-                    email: email,
-                }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Réponse du serveur après modification :', data);
-                // Rafraîchir la page ou effectuer d'autres actions si nécessaire
-                fetchUserData();
-            })
-            .catch(error => {
-                console.error('Erreur lors de la modification de l\'utilisateur:', error);
-            });
-        }
-
-        
-
+        // Envoi des données modifiées au serveur avec la méthode PUT
+        fetch(`http://localhost:8000/user/modification/${userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                nom: nom,
+                prenom: prenom,
+                email: email,
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Réponse du serveur après modification :', data);
+            // Rafraîchir la page ou effectuer d'autres actions si nécessaire
+            fetchUserData();
+        })
+        .catch(error => {
+            console.error('Erreur lors de la modification de l\'utilisateur:', error);
+        });
+    }
+    submitEditForm()
     </script>
 </body>
 </html>
